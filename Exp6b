@@ -1,66 +1,86 @@
-#include<iostream>
+//C++ implementation of above algorithm
+#include<bits/stdc++.h>
 using namespace std;
-#include<conio.h>
+
+// Function to find page faults using indexes
+int pageFaults(int pages[], int n, int capacity)
+{
+	// To represent set of current pages. We use
+	// an unordered_set so that we quickly check
+	// if a page is present in set or not
+	unordered_set<int> s;
+
+	// To store least recently used indexes
+	// of pages.
+	unordered_map<int, int> indexes;
+
+	// Start from initial page
+	int page_faults = 0;
+	for (int i=0; i<n; i++)
+	{
+		// Check if the set can hold more pages
+		if (s.size() < capacity)
+		{
+			// Insert it into set if not present
+			// already which represents page fault
+			if (s.find(pages[i])==s.end())
+			{
+				s.insert(pages[i]);
+
+				// increment page fault
+				page_faults++;
+			}
+
+			// Store the recently used index of
+			// each page
+			indexes[pages[i]] = i;
+		}
+
+		// If the set is full then need to perform lru
+		// i.e. remove the least recently used page
+		// and insert the current page
+		else
+		{
+			// Check if current page is not already
+			// present in the set
+			if (s.find(pages[i]) == s.end())
+			{
+				// Find the least recently used pages
+				// that is present in the set
+				int lru = INT_MAX, val;
+				for (auto it=s.begin(); it!=s.end(); it++)
+				{
+					if (indexes[*it] < lru)
+					{
+						lru = indexes[*it];
+						val = *it;
+					}
+				}
+
+				// Remove the indexes page
+				s.erase(val);
+
+				// insert the current page
+				s.insert(pages[i]);
+
+				// Increment page faults
+				page_faults++;
+			}
+
+			// Update the current page index
+			indexes[pages[i]] = i;
+		}
+	}
+
+	return page_faults;
+}
+
+// Driver code
 int main()
 {
- int nop,nof,page[20],i,count=0;
- cout<<"\n\tEnter the No. of Pages:";
- cin>>nop; //Store the no of Pages
- cout<<"\n\t Enter the Reference String:";
- for(i=0;i<nop;i++)
- {
- cout<<"\t";
- cin>>page[i]; //Store the pages
- }
- cout<<"\n\t Enter the No of frames:-";
- cin>>nof;
- int frame[nof],fcount[nof];
- for(i=0;i<nof;i++)
- {
- frame[i]=-1; //Store the frames
- fcount[i]=0; //Track when the page is last used
- }
- i=0;
- while(i<nop)
- {
- int j=0,flag=0;
- while(j<nof)
- {
- if(page[i]==frame[j]){
- flag=1;
- fcount[j]=i+1;
- }
- j++;
- }
- j=0;
- cout<<"\n\t**************************************\n";
- cout<<"\t"<<page[i]<<"-->";
-
-if(flag==0)
- {
- int min=0,k=0;
- while(k<nof-1)
- {
- if(fcount[min]>fcount[k+1])
- min=k+1;
- k++;
- }
- frame[min]=page[i];
- fcount[min]=i+1;
- count++;
-
- while(j<nof)
- {
- cout<<"\t|"<<frame[j]<<"|";
- j++;
- }
-
- }
- i++;
-
- }
- cout<<"\n\t**************************************\n";
- cout<<"\n\tPage Fault is:"<<count;
- getch();
- return 0;
+	int pages[] = {7, 0, 1, 2, 0, 3, 0, 4, 2, 3, 0, 3, 2};
+	int n = sizeof(pages)/sizeof(pages[0]);
+	int capacity = 4;
+	cout << pageFaults(pages, n, capacity);
+	return 0;
 }
