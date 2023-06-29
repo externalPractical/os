@@ -1,85 +1,90 @@
-#include<iostream>
+// CPP program to demonstrate optimal page
+// replacement algorithm.
+#include <bits/stdc++.h>
 using namespace std;
-#include<conio.h>
+
+// Function to check whether a page exists
+// in a frame or not
+bool search(int key, vector<int>& fr)
+{
+	for (int i = 0; i < fr.size(); i++)
+		if (fr[i] == key)
+			return true;
+	return false;
+}
+
+// Function to find the frame that will not be used
+// recently in future after given index in pg[0..pn-1]
+int predict(int pg[], vector<int>& fr, int pn, int index)
+{
+	// Store the index of pages which are going
+	// to be used recently in future
+	int res = -1, farthest = index;
+	for (int i = 0; i < fr.size(); i++) {
+		int j;
+		for (j = index; j < pn; j++) {
+			if (fr[i] == pg[j]) {
+				if (j > farthest) {
+					farthest = j;
+					res = i;
+				}
+				break;
+			}
+		}
+
+		// If a page is never referenced in future,
+		// return it.
+		if (j == pn)
+			return i;
+	}
+
+	// If all of the frames were not in future,
+	// return any of them, we return 0. Otherwise
+	// we return res.
+	return (res == -1) ? 0 : res;
+}
+
+void optimalPage(int pg[], int pn, int fn)
+{
+	// Create an array for given number of
+	// frames and initialize it as empty.
+	vector<int> fr;
+
+	// Traverse through page reference array
+	// and check for miss and hit.
+	int hit = 0;
+	for (int i = 0; i < pn; i++) {
+
+		// Page found in a frame : HIT
+		if (search(pg[i], fr)) {
+			hit++;
+			continue;
+		}
+
+		// Page not found in a frame : MISS
+
+		// If there is space available in frames.
+		if (fr.size() < fn)
+			fr.push_back(pg[i]);
+
+		// Find the page to be replaced.
+		else {
+			int j = predict(pg, fr, pn, i + 1);
+			fr[j] = pg[i];
+		}
+	}
+	cout << "No. of hits = " << hit << endl;
+	cout << "No. of misses = " << pn - hit << endl;
+}
+
+// Driver Function
 int main()
 {
- int nop,nof,page[20],i,count=0;
- cout<<"\n\tEnter the No. of Pages:";
- cin>>nop; //Store the no of pages
- cout<<"\n\t Enter the Reference String:";
-
-for(i=0;i<nop;i++)
- {
- cout<<"\t";
- cin>>page[i]; //Array for Storing Reference String
- }
-
- cout<<"\n\t Enter the No of frames:-";
- cin>>nof;
- int frame[nof],fcount[nof];
- for(i=0;i<nof;i++)
- {
- frame[i]=-1; //Frame Array
- fcount[i]=0; // Track the next Availability of frames
- }
- i=0;
- while(i<nop)
- {
- int j=0,flag=0;
- while(j<nof)
- {
- if(page[i]==frame[j]){ // Checking Whether the Page is Already in frame or not
- flag=1;
- }
- j++;
- }
- j=0;
- cout<<"\n\t**************************************\n";
- cout<<"\t"<<page[i]<<"-->";
- if(flag==0)
- {
- if(i>=nof)
- {
- int max=0,k=0;
- while(k<nof)
- {
- int dist=0,j1=i+1;
- while(j1<nop)
- {
- if(frame[k]!=page[j1])
- dist++;
- else
- {
- break;
- }
- j1++;
- }
- fcount[k]=dist;
- k++;
- }
- k=0;
- while(k<nof-1)
- {
- if(fcount[max]<fcount[k+1]) //Finding out the maxximum distance
- max=k+1;
- k++;
- }
- frame[max]=page[i];
- }
- else {
- frame[i%nof]=page[i];
- }
- count++;
- while(j<nof){
- cout<<"\t|"<<frame[j]<<"|";
- j++;
- }
-
- }
- i++;
- }
- cout<<"\n\t**************************************\n";
- cout<<"\n\tPage Fault is:"<<count;
- getch();
- return 0;
+	int pg[] = { 7, 0, 1, 2, 0, 3, 0, 4, 2, 3, 0, 3, 2 };
+	int pn = sizeof(pg) / sizeof(pg[0]);
+	int fn = 4;
+	optimalPage(pg, pn, fn);
+	return 0;
 }
+
+// This code is contributed by Karandeep Singh
